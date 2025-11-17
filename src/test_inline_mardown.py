@@ -1,7 +1,5 @@
 import unittest
-from inline_markdown import (
-    split_nodes_delimiter,
-)
+from inline_markdown import *
 
 from textnode import TextNode, TextType
 
@@ -86,6 +84,41 @@ class TestInlineMarkdown(unittest.TestCase):
             new_nodes,
         )
 
+    def test_extract_markdown_images(self):
+        matches = extract_markdown_images(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+
+    def test_extract_mardow_links(self):
+        matches = extract_markdown_links(
+            "this is a text with a link [to boot dev](https://www.boot.dev)"
+        )
+        self.assertListEqual([("to boot dev", "https://www.boot.dev")], matches)
+
+    def test_extract_mardow_links_with_an_image(self):
+        matches = extract_markdown_links(
+            "this text contains a link [to youtube](https://www.youtube.com) and an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([("to youtube", "https://www.youtube.com")], matches)
+
+    def test_extract_mardow_images_with_a_link(self):
+        matches = extract_markdown_images(
+            "this text contains a link [to youtube](https://www.youtube.com) and an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+    
+    def test_extract_mardow_images_without_images(self):
+        matches = extract_markdown_images(
+            "this text contains a link [to youtube](https://www.youtube.com)"
+        )
+        self.assertListEqual([], matches)
+
+    def test_extract_mardow_links_without_links(self):
+        matches = extract_markdown_links(
+            "this text contains an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([], matches)
 
 if __name__ == "__main__":
     unittest.main()
