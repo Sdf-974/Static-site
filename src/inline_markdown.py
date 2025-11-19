@@ -1,6 +1,7 @@
-from textnode import TextNode, TextType
+from textnode import *
 import re
 from enum import Enum
+from htmlnode import *
 
 class BlockType(Enum):
     PARAGRAPH = "paragraph"
@@ -174,4 +175,104 @@ def is_ordered_list(block):
 
     return True
 
+def markdown_to_html_node(markdown): 
+    block_nodes = []
+    blocks = markdown_to_blocks(markdown)
+    
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        if  block_type == BlockType.PARAGRAPH:
+            cleaned_block = block.replace("\n", " ")
+            children = text_to_children(cleaned_block)
+            node = ParentNode("p", children)
+            block_nodes.append(node)
 
+        elif block_type == BlockType.QUOTE:
+            lines = block.split("\n")
+            cleaned_lines = []
+
+            for line in lines:
+                if line.startswith("> "):
+                    cleaned_line = line[2:]   
+                elif line.startswith(">"):
+                    cleaned_line = line[1:]      
+                else:
+                    cleaned_line = line          
+
+                cleaned_lines.append(cleaned_line)
+
+            cleaned_block = " ".join(cleaned_lines)
+            children = text_to_children(cleaned_block)
+            node = ParentNode("blockquote", children)
+            block_nodes.append(node)
+
+        elif block_type == BlockType.HEADING:
+            level = 0
+            for char in block:
+                if char == "#":
+                    level += 1
+                else :
+                    break
+            cleaned = block[level + 1:]
+            cleaned_block = cleaned.replace("\n", " ")
+            children = text_to_children(cleaned_block)
+            node = ParentNode(f"h{level}", children)
+            block_nodes.append(node)
+
+        elif block_type == BlockType.UNORDERED_LIST:
+            li_nodes = list_block_to_children(block, False)
+            node = ParentNode("ul", li_nodes)
+            block_nodes.append(node)
+
+        elif block_type == BlockType.ORDERED_LIST:
+            li_nodes = list_block_to_children(block, True)
+            node = ParentNode("ol", li_nodes)
+            block_nodes.append(node)
+
+        elif block_type == BlockType.CODE:
+            code_nodes = code_block_to_code_node(block)
+            node = ParentNode("pre", [code_nodes])
+            block_nodes.append(node)
+
+    return ParentNode("div", block_nodes) 
+
+
+
+def text_to_children(text):
+    html_nodes = []
+    nodes = text_to_textnodes(text)
+    for node in nodes:
+        html_nodes.append(text_node_to_html_node(node))
+    return html_nodes
+
+
+def list_block_to_children(block, is_ordered):
+    lines = block.split("\n")
+    li_nodes = []
+    for line in lines :
+        if is_ordered:
+            index = line.find(".")
+            if index == -1:
+                continue
+            cleaned_line = line[index+2:]
+        else:
+            if line.startswith("- ") or line.startswith("* "):
+                cleaned_line = line[2:]
+            else:
+                continue   
+        
+
+        inline_children = text_to_children(cleaned_line)
+
+        li_node = ParentNode("li", inline_children)
+        li_nodes.append(li_node)
+
+    return li_nodes
+        
+def code_block_to_code_node(block):
+    lines = block.split("\n")
+    del lines[0]
+    del lines[-1]
+    cleaned_block = "\n".join(lines) + "\n"
+    node = TextNode(cleaned_block, TextType.CODE)
+    return text_node_to_html_node(node)
