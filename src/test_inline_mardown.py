@@ -325,5 +325,104 @@ This is the same paragraph on a new line
         )
 
 
+    def test_block_to_block_type_paragraph(self):
+        block = "This is a paragraph \nThis is the same paragraph on a new line"
+        block_type = block_to_block_type(block)
+        self.assertEqual(
+            block_type,
+            BlockType.PARAGRAPH,
+        )
+
+    def test_block_to_block_type_heading(self):
+        block = "### This is a heading"
+        block_type = block_to_block_type(block)
+        self.assertEqual(
+            block_type,
+            BlockType.HEADING,
+        )
+    
+    def test_block_to_block_type_not_heading(self):
+        block = "###########This is not a heading"
+        block_type = block_to_block_type(block)
+        self.assertEqual(
+            block_type,
+            BlockType.PARAGRAPH,
+        )
+
+    def test_block_to_block_type_multiple_line_heading(self):
+        block = "### This is not a heading\nThis is the same paragraph on a new line"
+        block_type = block_to_block_type(block)
+        self.assertEqual(
+            block_type,
+            BlockType.PARAGRAPH,
+        )
+
+    def test_block_to_block_code(self):
+        block = "```This is a code block\nThis is the same code block on a new line\nThis is the end of the code \n```"
+        block_type = block_to_block_type(block)
+        self.assertEqual(
+            block_type,
+            BlockType.CODE,
+        )
+
+    def test_block_to_block_code_missing_backticks(self):
+        block = "``` This is not a code block\nThis is the same none code block on a new line\nThis is the end of this none code block"
+        block_type = block_to_block_type(block)
+        self.assertEqual(
+            block_type,
+            BlockType.PARAGRAPH,
+        )
+
+    def test_block_to_block_quote(self):
+        block = ">This is a quote block\n>This is the same quote block on a new line\n>This is the end of the quote block"
+        block_type = block_to_block_type(block)
+        self.assertEqual(
+            block_type,
+            BlockType.QUOTE,
+        )
+
+    def test_block_to_block_not_quote(self):
+        block = ">This is not a quote block\n>This is the same none quote block on a new line\nThis is the end of the none quote block"
+        block_type = block_to_block_type(block)
+        self.assertEqual(
+            block_type,
+            BlockType.PARAGRAPH,
+        )
+
+    def test_block_to_block_unordered_list(self):
+        block = "- This is a unordered list block\n- This is the same unordered list block on a new line\n- This is the end of the unordered list"
+        block_type = block_to_block_type(block)
+        self.assertEqual(
+            block_type,
+            BlockType.UNORDERED_LIST,
+        )
+
+    def test_block_to_block_not_unordered_list(self):
+        block = "- This is a unordered list block\n-This is the same unordered list block on a new line\nThis is the end of the unordered list"
+        block_type = block_to_block_type(block)
+        self.assertEqual(
+            block_type,
+            BlockType.PARAGRAPH,
+        )
+
+    def test_block_to_block_ordered_list(self):
+        block = "1. This is a unordered list block\n2. This is the same unordered list block on a new line\n3. This is the end of the unordered list"
+        block_type = block_to_block_type(block)
+        self.assertEqual(
+            block_type,
+            BlockType.ORDERED_LIST,
+        )
+
+    def test_block_to_block_not_ordered_list(self):
+        block = "1. This is a unordered list block\n600. This is the same unordered list block on a new line\n3. This is the end of the unordered list"
+        block_type = block_to_block_type(block)
+        self.assertEqual(
+            block_type,
+            BlockType.PARAGRAPH,
+        )
+    
+    
+
+
 if __name__ == "__main__":
     unittest.main()

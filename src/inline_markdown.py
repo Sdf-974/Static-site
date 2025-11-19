@@ -1,5 +1,17 @@
 from textnode import TextNode, TextType
 import re
+from enum import Enum
+
+class BlockType(Enum):
+    PARAGRAPH = "paragraph"
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    UNORDERED_LIST = "unordered_list"
+    ORDERED_LIST = "ordered_list"
+
+
+
 
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
@@ -103,3 +115,63 @@ def markdown_to_blocks(markdown):
         if cleaned_block != "":
             blocks.append(cleaned_block)
     return blocks 
+
+
+def block_to_block_type(block):
+    lines = block.split("\n")
+
+    if len(lines) == 1:
+        line = lines[0]
+        prefixes = ("# ", "## ", "### ", "#### ", "##### ", "###### ")
+        if line.startswith(prefixes):
+            return BlockType.HEADING
+    if len(lines) > 1 and lines[0].startswith("```") and lines[-1].startswith("```"):
+        return BlockType.CODE
+    
+    is_quote = True
+    for line in lines:
+        if not line.startswith(">"):
+            is_quote = False
+            break
+    if is_quote:
+        return BlockType.QUOTE
+    
+    is_unordered_list = True
+    for line in lines:
+        if not line.startswith("- "):
+            is_unordered_list = False
+            break
+    if is_unordered_list:
+        return BlockType.UNORDERED_LIST
+    
+    if is_ordered_list(block):
+        return BlockType.ORDERED_LIST
+    
+    return BlockType.PARAGRAPH
+    
+
+
+def is_ordered_list(block):
+    lines = block.split("\n")
+    expected_nums = 1
+    for line in lines:
+        index = line.find(" ")
+        
+        if index == -1:
+            return False
+        
+        prefix = line[:index]
+        
+        if prefix[-1] != ".":
+            return False
+        
+        if not prefix[:-1].isdigit():
+            return False
+        
+        if int(prefix[:-1]) != expected_nums:
+            return False
+        expected_nums += 1
+
+    return True
+
+
