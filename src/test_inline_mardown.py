@@ -1,5 +1,6 @@
 import unittest
 from inline_markdown import *
+from gencontent import extract_title
 
 from textnode import TextNode, TextType
 
@@ -503,9 +504,21 @@ the **same** even with inline stuff
         html,
         "<div><blockquote>This is a quote another line another line another line</blockquote></div>",
         )
-    
-    
-    
+
+
+    def test_extract_title(self):
+        md= "# This is the title"
+        title = extract_title(md)
+        self.assertEqual(
+            title,
+            "This is the title"
+        )
+
+    def test_extract_title_raise(self):
+        with self.assertRaises(Exception) as cm:
+            extract_title("## This is the title")
+        self.assertEqual(str(cm.exception), "Error: missing title!")
+     
 
 
 if __name__ == "__main__":
