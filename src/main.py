@@ -1,7 +1,11 @@
-from textnode import TextNode, TextType
+from copystatic import cleaning_path, copy_recursive
 
 def main():
-    node =TextNode("This is some anchor text", TextType.LINK , "https://www.boot.dev")
-    print(node)
+    public_path = "./public"
+    src_path = "./static"
+    cleaning_path(public_path)
+    copy_recursive(src_path, public_path)
+
+    
 
 main()
